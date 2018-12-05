@@ -1,0 +1,31 @@
+{
+  "name": "express-winston-logger",
+  "version": "1.0.0",
+  "description": "Winston based logger for express",
+  "main": "index.js",
+  "dependencies": {
+    "ip": "^1.1.5",
+    "winston": "^3.1.0",
+    "winston-daily-rotate-file": "^3.5.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xexi/express-winston-logger.git"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "log",
+    "logger",
+    "winston"
+  ],
+  "author": "xexi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xexi/express-winston-logger/issues"
+  },
+  "homepage": "https://github.com/xexi/express-winston-logger#readme"
+}
