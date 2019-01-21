@@ -35,8 +35,9 @@ module.exports = function (appName) {
     const location = process.platform === "win32" ? 'C:\\nodeLogs\\' + appName : '/data/logs/node/' + appName
     if (!fs.existsSync(location)) fs.mkdirSync(location);
     tport.push(new transports.File({
-        filename : location+ '/warn.log',
-        level: 'warn'
+        filename : location+ '/warn.json',
+        level: 'warn',
+        eol: ",\n"
     }));
     tport.push(new DailyRotateFile({
         dirname : location,
