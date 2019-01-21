@@ -22,9 +22,11 @@ if(process.env.NODE_ENV!=='production') {
     }));
 }
 class loggerFormata{
-    constructor(level, label, message, responsetime){
+    constructor(level, label, code, requestdata, message, responsetime){
         this.level = level;
         this.label = label;
+        this.code = code;
+        this.requestdata = requestdata;
         this.message = message;
         this.responsetime = responsetime;
     }
@@ -43,13 +45,13 @@ module.exports = function (appName) {
         datePattern: 'YYYY-MM-DD-HH',
         maxSize : '1m',
         maxFiles : '14d',
-        eol: "\n",
+        eol: ",\n"
     }));
     const logger = createLogger({
         level : 'debug',
         format: combine(
             timestamp({format: 'YYYY-MM-DD HH:mm:ss'}),
-            printf(info => `{ 'appName': '`+ appName +`', 'timeStamp':'${info.timestamp}', 'level':'${info.level}', 'label':'${info.label}', 'message':'${info.message}', 'responseTime':${info.responsetime}, 'serverIp': '`+appIp+`' }`)
+            printf(info => `{ "appName": "`+ appName +`", "timeStamp":"${info.timestamp}", "level":"${info.level}", "label":"${info.label}", "code": ${info.code}, "requestdata": ${info.requestdata}, "message": ${info.message}, "responseTime": ${info.responsetime}, "serverIp": "`+appIp+`" }`)
         ),
         transports : tport,
         exceptionHandlers: [
@@ -64,20 +66,20 @@ module.exports = function (appName) {
                 next()
             }
         },
-        info: (label, msg, st)=>{
-            logger.log(new loggerFormata('info', label, msg, new Date()-st))
+        info: (label, code, req, msg, st)=>{
+            logger.log(new loggerFormata('info', label, code, req, msg, new Date()-st))
         },
-        error: (label, msg, st)=>{
-            logger.log(new loggerFormata('error', label, msg, new Date()-st))
+        error: (label, code, req, msg, st)=>{
+            logger.log(new loggerFormata('error', label, code, req, msg, new Date()-st))
         },
-        warn: (label, msg, st)=>{
-            logger.log(new loggerFormata('warn', label, msg, new Date()-st))
+        warn: (label, code, req, msg, st)=>{
+            logger.log(new loggerFormata('warn', label, code, req, msg, new Date()-st))
         },
-        verbose: (label, msg, st)=> {
-            logger.log(new loggerFormata('verbose', label, msg, new Date()-st))
+        verbose: (label, code, req, msg, st)=>{
+            logger.log(new loggerFormata('verbose', label, code, req, msg, new Date()-st))
         },
-        debug : (label, msg, st) => {
-            logger.log(new loggerFormata('debug', label, msg, new Date()-st))
+        debug : (label, code, req, msg, st)=>{
+            logger.log(new loggerFormata('debug', label, code, req, msg, new Date()-st))
         }
     }
 };
