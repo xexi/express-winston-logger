@@ -8,19 +8,7 @@ const { createLogger, format, transports } = require('winston')
 const { combine, label, timestamp, printf, colorize, simple } = format
 const DailyRotateFile  = require('winston-daily-rotate-file')
 const tport = []
-const locale = process.platform === "win32" ? 'C:\\nodeLogs' : '/data/logs/node'
-if (!fs.existsSync(locale)) fs.mkdirSync(locale);
-if(process.env.NODE_ENV!=='production') {
-    tport.push(new transports.Console({
-        level: 'debug',
-        handleExceptions: true,
-        json: false,
-        format: combine(
-            colorize(),
-            simple()
-        )
-    }));
-}
+
 class loggerFormata{
     constructor(level, label, code, requestdata, message, responsetime){
         this.level = level;
@@ -31,21 +19,42 @@ class loggerFormata{
         this.responsetime = responsetime;
     }
 }
-module.exports = function (appName) {
-    const location = process.platform === "win32" ? 'C:\\nodeLogs\\' + appName : '/data/logs/node/' + appName
-    if (!fs.existsSync(location)) fs.mkdirSync(location);
+
+module.exports = function (appName, maxSize, maxFiles, path) {
+    const os = typeof(path) ==='undefined' ? {
+        windows : 'C:\\nodeLogs',
+        linux : '/data/logs/node'
+    } : {
+        windows : typeof(path.windows) === 'undefined' ? 'C:\\nodeLogs' : path.windows,
+        linux : typeof(path.linux) === 'undefined' ? '/data/logs/node' : path.linux
+    };
+    const base_dir = process.platform === "win32" ? os.windows : os.linux;
+    if (!fs.existsSync(base_dir)) fs.mkdirSync(base_dir);
+    if(process.env.NODE_ENV!=='production') {
+        tport.push(new transports.Console({
+            level: 'debug',
+            handleExceptions: true,
+            json: false,
+            format: combine(
+                colorize(),
+                simple()
+            )
+        }));
+    }
+    const project_dir = base_dir + '/' + appName;
+    if (!fs.existsSync(project_dir)) fs.mkdirSync(project_dir);
     tport.push(new transports.File({
-        filename : location+ '/warn.json',
+        filename : project_dir+ '/warn.json',
         level: 'warn',
         eol: ",\n"
     }));
     tport.push(new DailyRotateFile({
-        dirname : location,
+        dirname : project_dir,
         localTime: true,
         filename: appName+ '-%DATE%.json',
         datePattern: 'YYYY-MM-DD-HH',
-        maxSize : '1m',
-        maxFiles : '14d',
+        maxSize : typeof(maxSize) ==='undefined' ? '1m' : maxSize,
+        maxFiles : typeof(maxFiles) === 'undefined' ? '14d' : maxFiles,
         eol: ",\n"
     }));
     const logger = createLogger({
@@ -56,7 +65,7 @@ module.exports = function (appName) {
         ),
         transports : tport,
         exceptionHandlers: [
-            new transports.File({ filename: location + '/exceptions.log' })
+            new transports.File({ filename: project_dir + '/exceptions.log' })
         ],
         exitOnError: false
     });
