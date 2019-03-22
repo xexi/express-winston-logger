@@ -8,6 +8,13 @@ const { createLogger, format, transports } = require('winston')
 const { combine, label, timestamp, printf, colorize, simple } = format
 const DailyRotateFile  = require('winston-daily-rotate-file')
 const tport = []
+const default_maxSize = '1m';
+const default_maxFiles = '14d';
+const default_path = {
+    windows : 'C:\\nodeLogs',
+    linux : '/data/logs/node'
+};
+const default_datePattern = 'YYYY-MM-DD-HH';
 
 class loggerFormata{
     constructor(level, label, code, requestdata, message, responsetime){
@@ -20,15 +27,29 @@ class loggerFormata{
     }
 }
 
-module.exports = function (appName, maxSize, maxFiles, path) {
-    const os = typeof(path) ==='undefined' ? {
-        windows : 'C:\\nodeLogs',
-        linux : '/data/logs/node'
-    } : {
-        windows : typeof(path.windows) === 'undefined' ? 'C:\\nodeLogs' : path.windows,
-        linux : typeof(path.linux) === 'undefined' ? '/data/logs/node' : path.linux
-    };
-    const base_dir = process.platform === "win32" ? os.windows : os.linux;
+class optionFormata{
+    constructor(o){
+        if(typeof(o)==='undefined'){
+            this.maxSize = default_maxSize;
+            this.maxFiles = default_maxFiles;
+            this.path = default_path;
+            this.datePattern = default_datePattern;
+        } else {
+            this.maxSize = typeof(o.maxSize) === 'undefined' ? default_maxSize : o.maxSize;
+            this.maxFiles = typeof(o.maxFiles) === 'undefined' ? default_maxFiles : o.maxFiles;
+            this.path = typeof(o.path) === 'undefined' ? default_path : {
+                windows : typeof(o.path.windows) === 'undefined' ? default_path.windows : o.path.windows,
+                linux : typeof(o.path.linux) === 'undefined' ? default_path.linux : o.path.linux
+            };
+            this.datePattern = typeof(o.datePattern) === 'undefined' ? default_datePattern : o.datePattern
+        }
+    }
+}
+
+module.exports = function (appName, option) {
+    const opt = new optionFormata(option);
+    const path = opt.path
+    const base_dir = process.platform === "win32" ? path.windows : path.linux;
     if (!fs.existsSync(base_dir)) fs.mkdirSync(base_dir);
     if(process.env.NODE_ENV!=='production') {
         tport.push(new transports.Console({
@@ -52,9 +73,9 @@ module.exports = function (appName, maxSize, maxFiles, path) {
         dirname : project_dir,
         localTime: true,
         filename: appName+ '-%DATE%.json',
-        datePattern: 'YYYY-MM-DD-HH',
-        maxSize : typeof(maxSize) ==='undefined' ? '1m' : maxSize,
-        maxFiles : typeof(maxFiles) === 'undefined' ? '14d' : maxFiles,
+        datePattern: opt.datePattern,
+        maxSize : opt.maxSize,
+        maxFiles : opt.maxFiles,
         eol: ",\n"
     }));
     const logger = createLogger({
