@@ -4,9 +4,9 @@
   "description": "Winston based logger for express",
   "main": "index.js",
   "dependencies": {
-    "ip": "^1.1.5",
-    "winston": "^3.2.1",
-    "winston-daily-rotate-file": "^3.8.0"
+    "ip": "^1.1.8",
+    "winston": "^3.8.1",
+    "winston-daily-rotate-file": "^4.7.1"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

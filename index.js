@@ -50,7 +50,7 @@ module.exports = function (appName, option) {
     const opt = new optionFormata(option);
     const path = opt.path
     const base_dir = process.platform === "win32" ? path.windows : path.linux;
-    if (!fs.existsSync(base_dir)) fs.mkdirSync(base_dir);
+    fs.mkdirSync(base_dir, {recursive: true});
     if(process.env.NODE_ENV!=='production') {
         tport.push(new transports.Console({
             level: 'debug',
@@ -63,7 +63,7 @@ module.exports = function (appName, option) {
         }));
     }
     const project_dir = base_dir + '/' + appName;
-    if (!fs.existsSync(project_dir)) fs.mkdirSync(project_dir);
+    fs.mkdirSync(project_dir, {recursive: true});
     tport.push(new transports.File({
         filename : project_dir+ '/warn.json',
         level: 'warn',
