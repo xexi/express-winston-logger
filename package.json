@@ -1,6 +1,6 @@
 {
   "name": "express-winston-logger",
-  "version": "1.1.2",
+  "version": "1.2.5",
   "description": "Winston based logger for express",
   "main": "index.js",
   "dependencies": {
